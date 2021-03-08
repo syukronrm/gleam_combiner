@@ -1,5 +1,5 @@
 {application, combiner,
- [{description, "A Gleam project"},
+ [{description, "A Parser Combinator in Gleam"},
   {vsn, "1.0.0"},
   {registered, []},
   {applications,
