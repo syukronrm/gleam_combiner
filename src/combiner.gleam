@@ -1,68 +1,77 @@
 import gleam/string
 import gleam/int
-
-pub type Remain =
-  String
-
-pub type ErrorKind {
-  IntegerErr
-  TagErr
-}
+import gleam/io
 
 pub type ParseError {
-  ParseError(input: String, error_kind: ErrorKind)
+  ParseError(input: String, message: String)
 }
 
-pub fn tag(
-  input: String,
-  key: String,
-) -> Result(tuple(Remain, String), ParseError) {
-  case string.length(input) == 0 {
-    True -> Error(ParseError(input, TagErr))
-    _ -> {
-      let key_length = string.length(key)
-      let str = string.slice(input, 0, key_length)
-      case key_length {
-        0 -> Error(ParseError(input, TagErr))
-        _ ->
-          case str == key {
-            True -> Ok(tuple(string.drop_left(input, key_length), key))
-            _ -> Error(ParseError(input, TagErr))
+pub type Output(a) =
+  Result(tuple(a, a), ParseError)
+
+pub type Parser(a) =
+  fn(a) -> Output(a)
+
+pub fn tag(str) -> Parser(String) {
+  fn(input) {
+    let len = string.length(str)
+    case string.slice(input, 0, len) == str {
+      True -> Ok(tuple(string.drop_left(input, len), str))
+      False -> Error(ParseError(input, "TagError"))
+    }
+  }
+}
+
+pub fn digit1(_count) -> Parser(String) {
+  todo
+}
+
+fn run(parser: fn(a) -> b, input) {
+  parser(input)
+}
+
+pub fn then(parser1: Parser(String), parser2: Parser(String)) -> Parser(String) {
+  fn(input) {
+    let result1 = run(parser1, input)
+    case result1 {
+      Error(err) -> Error(err)
+      Ok(tuple(remain1, matched1)) -> {
+        let result2 = run(parser2, remain1)
+        case result2 {
+          Error(err) -> Error(err)
+          Ok(tuple(remain2, matched2)) -> {
+            let combined = string.append(matched1, matched2)
+            Ok(tuple(remain2, combined))
           }
+        }
       }
     }
   }
 }
 
-pub fn integer(
-  input: String,
-  count: Int,
-) -> Result(tuple(Remain, Int), ParseError) {
-  case string.length(input) == 0 {
-    True -> Error(ParseError(input, IntegerErr))
-    _ -> {
-      let str = string.slice(input, 0, count)
-      case string.length(str) == count {
-        True ->
-          case int.parse(str) {
-            Ok(num) -> Ok(tuple(string.drop_left(input, count), num))
-            _err -> Error(ParseError(input, IntegerErr))
-          }
-        _ -> Error(ParseError(input, IntegerErr))
-      }
+pub fn or(parser1: Parser(a), parser2: Parser(a)) -> Parser(a) {
+  fn(input) {
+    let result = run(parser1, input)
+    case result {
+      Ok(_) -> result
+      Error(_) -> run(parser2, input)
     }
   }
 }
 
-// Example
-pub type Color {
-  Color(red: Int, green: Int, blue: Int)
-}
-
-pub fn color_parser(input: String) -> Result(Color, ParseError) {
-  try tuple(input, _) = tag(input, "#")
-  try tuple(input, red) = integer(input, 2)
-  try tuple(input, green) = integer(input, 2)
-  try tuple(_input, blue) = integer(input, 2)
-  Ok(Color(red, green, blue))
+pub fn map(_parser: Parser(a), _fun: fn(a) -> b) -> Parser(b) {
+  // fn(input) {
+  //   let result = run(parser, input)
+  //   case result {
+  //     Ok(tuple(remain, matched1)) -> {
+  //       let matched2 = fun(matched1)
+  //       Ok(tuple(remain, matched2))
+  //     }
+  //     Error(err) -> {
+  //       let ParseError(input, message) = err
+  //       Error(ParseError(input, message))
+  //     }
+  //   }
+  // }
+  todo
 }

@@ -1,6 +1,6 @@
 # combiner
 
-A Gleam project
+An experimental parser combinator, inspired by [Nom](https://github.com/Geal/nom).
 
 ## Quick start
 
@@ -10,15 +10,4 @@ rebar3 eunit
 
 # Run the Erlang REPL
 rebar3 shell
-```
-
-## Installation
-
-If [available in Hex](https://rebar3.org/docs/configuration/dependencies/#declaring-dependencies)
-this package can be installed by adding `combiner` to your `rebar.config` dependencies:
-
-```erlang
-{deps, [
-    combiner
-]}.
 ```
