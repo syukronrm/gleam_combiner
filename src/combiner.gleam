@@ -22,6 +22,16 @@ pub fn tag(str) -> Parser(String) {
   }
 }
 
+pub fn take(len: Int) -> Parser(String) {
+  fn(input) {
+    let taken_str = string.slice(input, 0, len)
+    case string.length(taken_str) == len {
+      True -> Ok(tuple(string.drop_left(input, len), taken_str))
+      False -> Error(ParseError(input, "TakeError"))
+    }
+  }
+}
+
 pub fn digit1(_count) -> Parser(String) {
   todo
 }
