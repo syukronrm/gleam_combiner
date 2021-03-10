@@ -70,10 +70,7 @@ pub fn or(parser1: Parser(i, o, e), parser2: Parser(i, o, e)) -> Parser(i, o, e)
   }
 }
 
-pub fn map(
-  parser: Parser(a, b, ParseError(a)),
-  fun: fn(b) -> c,
-) -> Parser(a, c, ParseError(a)) {
+pub fn map(parser: Parser(a, b, e), fun: fn(b) -> c) -> Parser(a, c, e) {
   fn(input) {
     let result = run(parser, input)
     case result {
@@ -81,7 +78,7 @@ pub fn map(
         let matched2 = fun(matched1)
         Ok(tuple(remain, matched2))
       }
-      Error(ParseError(input, message)) -> Error(ParseError(input, message))
+      Error(e) -> Error(e)
     }
   }
 }
