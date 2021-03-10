@@ -9,10 +9,10 @@ pub type ParseError {
 pub type Output(a) =
   Result(tuple(a, a), ParseError)
 
-pub type Parser(a) =
-  fn(a) -> Output(a)
+pub type Parser(i, o, e) =
+  fn(i) -> Result(tuple(i, o), e)
 
-pub fn tag(str) -> Parser(String) {
+pub fn tag(str) -> Parser(String, String, ParseError) {
   fn(input) {
     let len = string.length(str)
     case string.slice(input, 0, len) == str {
@@ -22,7 +22,7 @@ pub fn tag(str) -> Parser(String) {
   }
 }
 
-pub fn take(len: Int) -> Parser(String) {
+pub fn take(len: Int) -> Parser(String, String, ParseError) {
   fn(input) {
     let taken_str = string.slice(input, 0, len)
     case string.length(taken_str) == len {
@@ -32,7 +32,7 @@ pub fn take(len: Int) -> Parser(String) {
   }
 }
 
-pub fn digit1(_count) -> Parser(String) {
+pub fn digit1(_count) -> Parser(String, String, ParseError) {
   todo
 }
 
@@ -40,7 +40,10 @@ fn run(parser: fn(a) -> b, input) {
   parser(input)
 }
 
-pub fn then(parser1: Parser(String), parser2: Parser(String)) -> Parser(String) {
+pub fn then(
+  parser1: Parser(String, String, e),
+  parser2: Parser(String, String, e),
+) -> Parser(String, String, e) {
   fn(input) {
     let result1 = run(parser1, input)
     case result1 {
@@ -59,7 +62,7 @@ pub fn then(parser1: Parser(String), parser2: Parser(String)) -> Parser(String) 
   }
 }
 
-pub fn or(parser1: Parser(a), parser2: Parser(a)) -> Parser(a) {
+pub fn or(parser1: Parser(i, o, e), parser2: Parser(i, o, e)) -> Parser(i, o, e) {
   fn(input) {
     let result = run(parser1, input)
     case result {
@@ -69,19 +72,18 @@ pub fn or(parser1: Parser(a), parser2: Parser(a)) -> Parser(a) {
   }
 }
 
-pub fn map(_parser: Parser(a), _fun: fn(a) -> b) -> Parser(b) {
-  // fn(input) {
-  //   let result = run(parser, input)
-  //   case result {
-  //     Ok(tuple(remain, matched1)) -> {
-  //       let matched2 = fun(matched1)
-  //       Ok(tuple(remain, matched2))
-  //     }
-  //     Error(err) -> {
-  //       let ParseError(input, message) = err
-  //       Error(ParseError(input, message))
-  //     }
-  //   }
-  // }
-  todo
+pub fn map(
+  parser: Parser(a, b, ParseError),
+  fun: fn(b) -> c,
+) -> Parser(a, c, ParseError) {
+  fn(input) {
+    let result = run(parser, input)
+    case result {
+      Ok(tuple(remain, matched1)) -> {
+        let matched2 = fun(matched1)
+        Ok(tuple(remain, matched2))
+      }
+      Error(ParseError(input, message)) -> Error(ParseError(input, message))
+    }
+  }
 }
