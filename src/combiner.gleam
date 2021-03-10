@@ -35,7 +35,7 @@ pub fn take_while(
   fun: fn(String) -> Bool,
 ) -> Parser(String, String, ParseError(String)) {
   fn(input) {
-    let matched =
+    let matched_graphemes =
       input
       |> string.to_graphemes
       |> list.fold_until(
@@ -47,14 +47,20 @@ pub fn take_while(
           }
         },
       )
-      |> list.reverse()
-      |> string.join("")
 
-    let remain =
-      input
-      |> string.drop_left(string.length(matched))
-
-    Ok(tuple(remain, matched))
+    case matched_graphemes {
+      [] -> Error(ParseError(input, "TakeWhileError"))
+      _ -> {
+        let matched =
+          matched_graphemes
+          |> list.reverse()
+          |> string.join("")
+        let remain =
+          input
+          |> string.drop_left(string.length(matched))
+        Ok(tuple(remain, matched))
+      }
+    }
   }
 }
 
@@ -62,7 +68,7 @@ pub fn take_till(
   fun: fn(String) -> Bool,
 ) -> Parser(String, String, ParseError(String)) {
   fn(input) {
-    let matched =
+    let matched_graphemes =
       input
       |> string.to_graphemes
       |> list.fold_until(
@@ -74,15 +80,27 @@ pub fn take_till(
           }
         },
       )
-      |> list.reverse()
-      |> string.join("")
 
-    let remain =
-      input
-      |> string.drop_left(string.length(matched))
-
-    Ok(tuple(remain, matched))
+    case matched_graphemes {
+      [] -> Error(ParseError(input, "TakeTillError"))
+      _ -> {
+        let matched =
+          matched_graphemes
+          |> list.reverse()
+          |> string.join("")
+        let remain =
+          input
+          |> string.drop_left(string.length(matched))
+        Ok(tuple(remain, matched))
+      }
+    }
   }
+}
+
+// Choice combinator
+pub fn alt(parsers: List(Parser(i, o, e))) -> Parser(i, o, e) {
+  let [first, ..rest] = parsers
+  list.fold(rest, first, fn(p, acc) { or(acc, p) })
 }
 
 // Test functions

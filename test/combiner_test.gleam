@@ -25,19 +25,30 @@ pub fn take_while_test() {
   |> should.equal(Ok(tuple("100", "Aa")))
 
   combiner.take_while(combiner.is_alphabetic)("100Aa")
-  |> should.equal(Ok(tuple("100Aa", "")))
+  |> should.equal(Error(ParseError("100Aa", "TakeWhileError")))
 
   combiner.take_while(combiner.is_alphabetic)("")
-  |> should.equal(Ok(tuple("", "")))
+  |> should.equal(Error(ParseError("", "TakeWhileError")))
 }
 
 pub fn take_till_test() {
-  combiner.take_till(combiner.is_alphabetic)("Aa100")
-  |> should.equal(Ok(tuple("Aa100", "")))
-
   combiner.take_till(combiner.is_alphabetic)("100Aa")
   |> should.equal(Ok(tuple("Aa", "100")))
 
+  combiner.take_till(combiner.is_alphabetic)("Aa100")
+  |> should.equal(Error(ParseError("Aa100", "TakeTillError")))
+
   combiner.take_till(combiner.is_alphabetic)("")
-  |> should.equal(Ok(tuple("", "")))
+  |> should.equal(Error(ParseError("", "TakeTillError")))
+}
+
+pub fn alt_test() {
+  let take_integer = combiner.take_while(combiner.is_digit)
+  let take_alphabetic = combiner.take_while(combiner.is_alphabetic)
+
+  combiner.alt([take_integer, take_alphabetic])("11aa22bb")
+  |> should.equal(Ok(tuple("aa22bb", "11")))
+
+  combiner.alt([take_alphabetic, take_integer])("11cc22dd")
+  |> should.equal(Ok(tuple("cc22dd", "11")))
 }
