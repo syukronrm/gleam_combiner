@@ -1,5 +1,6 @@
 import gleam/string
 import gleam/int
+import gleam/list.{Continue, Stop}
 import gleam/io
 
 pub type ParseError(a) {
@@ -9,6 +10,7 @@ pub type ParseError(a) {
 pub type Parser(i, o, e) =
   fn(i) -> Result(tuple(i, o), e)
 
+// Basic Elements
 pub fn tag(str) -> Parser(String, String, ParseError(String)) {
   fn(input) {
     let len = string.length(str)
@@ -29,10 +31,76 @@ pub fn take(len: Int) -> Parser(String, String, ParseError(String)) {
   }
 }
 
-pub fn digit1(_count) -> Parser(String, String, ParseError(String)) {
-  todo
+pub fn take_while(
+  fun: fn(String) -> Bool,
+) -> Parser(String, String, ParseError(String)) {
+  fn(input) {
+    let matched =
+      input
+      |> string.to_graphemes
+      |> list.fold_until(
+        [],
+        fn(i, acc) {
+          case fun(i) {
+            True -> Continue([i, ..acc])
+            _ -> Stop(acc)
+          }
+        },
+      )
+      |> list.reverse()
+      |> string.join("")
+
+    let remain =
+      input
+      |> string.drop_left(string.length(matched))
+
+    Ok(tuple(remain, matched))
+  }
 }
 
+pub fn take_till(
+  fun: fn(String) -> Bool,
+) -> Parser(String, String, ParseError(String)) {
+  fn(input) {
+    let matched =
+      input
+      |> string.to_graphemes
+      |> list.fold_until(
+        [],
+        fn(i, acc) {
+          case fun(i) {
+            False -> Continue([i, ..acc])
+            _ -> Stop(acc)
+          }
+        },
+      )
+      |> list.reverse()
+      |> string.join("")
+
+    let remain =
+      input
+      |> string.drop_left(string.length(matched))
+
+    Ok(tuple(remain, matched))
+  }
+}
+
+// Test functions
+pub fn is_digit(c) {
+  list.contains(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"], c)
+}
+
+pub fn is_alphabetic(c) -> Bool {
+  list.contains(
+    [
+      "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
+      "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
+    ],
+    string.lowercase(c),
+  )
+}
+
+// Basic Combinator
 fn run(parser: fn(a) -> b, input) {
   parser(input)
 }
@@ -82,3 +150,4 @@ pub fn map(parser: Parser(a, b, e), fun: fn(b) -> c) -> Parser(a, c, e) {
     }
   }
 }
+// 
