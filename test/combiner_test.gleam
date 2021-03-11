@@ -1,23 +1,27 @@
 import combiner.{ParseError}
 import gleam/should
+import gleam/bit_string
 
 pub fn tag_test() {
-  combiner.tag("#")("#Example")
-  |> should.equal(Ok(tuple("Example", "#")))
+  combiner.tag(<<"#":utf8>>)(<<"#Example":utf8>>)
+  |> should.equal(Ok(tuple(<<"Example":utf8>>, <<"#":utf8>>)))
 
-  combiner.tag("#X")("#Example")
-  |> should.equal(Error(ParseError("#Example", "TagError")))
+  combiner.tag(<<"#ß":utf8>>)(<<"#ß↑e̊":utf8>>)
+  |> should.equal(Ok(tuple(<<"↑e̊":utf8>>, <<"#ß":utf8>>)))
+
+  combiner.tag(<<"#X":utf8>>)(<<"#Example":utf8>>)
+  |> should.equal(Error(ParseError(<<"#Example":utf8>>, "TagError")))
 }
 
 pub fn take_test() {
-  combiner.take(4)("#Example")
-  |> should.equal(Ok(tuple("mple", "#Exa")))
+  combiner.take(4)(<<"#Example":utf8>>)
+  |> should.equal(Ok(tuple(<<"mple":utf8>>, <<"#Exa":utf8>>)))
 
-  combiner.take(10)("#Example")
-  |> should.equal(Error(ParseError("#Example", "TakeError")))
+  combiner.take(10)(<<"#Example":utf8>>)
+  |> should.equal(Error(ParseError(<<"#Example":utf8>>, "TakeError")))
 
-  combiner.take(0)("#Example")
-  |> should.equal(Ok(tuple("#Example", "")))
+  combiner.take(0)(<<"#Example":utf8>>)
+  |> should.equal(Ok(tuple(<<"#Example":utf8>>, <<"":utf8>>)))
 }
 
 pub fn take_while_test() {
