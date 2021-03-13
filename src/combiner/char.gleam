@@ -126,3 +126,16 @@ pub fn take_till(
     }
   }
 }
+
+pub fn char(c: String) -> Parser(String, String, ParseError(String)) {
+  fn(input) {
+    case string.pop_grapheme(input) {
+      Error(_) -> Error(ParseError(input, "CharError"))
+      Ok(tuple(first_char, rest)) ->
+        case first_char == c {
+          False -> Error(ParseError(input, "CharError"))
+          True -> Ok(tuple(rest, c))
+        }
+    }
+  }
+}

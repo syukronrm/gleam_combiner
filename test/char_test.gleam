@@ -47,3 +47,14 @@ pub fn take_till_test() {
   char.take_till(test.is_alphabetic)("")
   |> should.equal(Error(ParseError("", "TakeTillError")))
 }
+
+pub fn char_test() {
+  char.char("E")("Example")
+  |> should.equal(Ok(tuple("xample", "E")))
+
+  char.char("x")("Example")
+  |> should.equal(Error(ParseError("Example", "CharError")))
+
+  char.char("E")("")
+  |> should.equal(Error(ParseError("", "CharError")))
+}
