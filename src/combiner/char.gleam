@@ -139,3 +139,18 @@ pub fn char(c: String) -> Parser(String, String, ParseError(String)) {
     }
   }
 }
+
+pub fn any_of(chars: String) -> Parser(String, String, ParseError(String)) {
+  fn(input) {
+    case string.pop_grapheme(input) {
+      Error(_) -> Error(ParseError(input, "AnyOfError"))
+      Ok(tuple(c, rest)) -> {
+        let graphemes = string.to_graphemes(chars)
+        case list.contains(graphemes, c) {
+          True -> Ok(tuple(rest, c))
+          _ -> Error(ParseError(input, "AnyOfError"))
+        }
+      }
+    }
+  }
+}

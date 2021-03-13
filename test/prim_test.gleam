@@ -38,6 +38,6 @@ pub fn test_map() {
   prim.map(parser_1, int.parse)("A1")
   |> should.equal(Error(ParseError("A1", "CharError")))
 
-  prim.map(parser_1, fn(c) { Error(False) })("1")
+  prim.map(parser_1, fn(_c) { Error(False) })("1")
   |> should.equal(Error(ParseError("A1", "MapError")))
 }

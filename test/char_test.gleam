@@ -58,3 +58,11 @@ pub fn char_test() {
   char.char("E")("")
   |> should.equal(Error(ParseError("", "CharError")))
 }
+
+pub fn any_of_test() {
+  char.any_of("AOE")("Example")
+  |> should.equal(Ok(tuple("xample", "E")))
+
+  char.any_of("AO")("Example")
+  |> should.equal(Error(ParseError("Example", "AnyOfError")))
+}
