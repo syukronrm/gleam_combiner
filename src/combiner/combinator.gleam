@@ -15,14 +15,15 @@ pub fn sequence(parsers: List(Parser(i, o, e))) -> Parser(i, List(o), e) {
   }
 }
 
-fn recursive(parser1, parser2, input) {
+fn match_zero_or_more(parser1, parser2, input) {
   let concat_list = fn(head, tail) { [head, ..tail] }
   case prim.then(parser1, parser2, concat_list)(input) {
     Error(_) -> parser2(input)
-    Ok(tuple(input2, output)) -> recursive(parser1, prim.return(output), input2)
+    Ok(tuple(input2, output)) ->
+      match_zero_or_more(parser1, prim.return(output), input2)
   }
 }
 
 pub fn many(parser: Parser(i, o, e)) -> Parser(i, List(o), e) {
-  recursive(parser, prim.return([]), _)
+  match_zero_or_more(parser, prim.return([]), _)
 }
