@@ -16,10 +16,10 @@ fn run(parser: fn(a) -> b, input) {
 }
 
 pub fn then(
-  parser1: Parser(i, o, e),
-  parser2: Parser(i, o, e),
-  fun: fn(o, o) -> o,
-) -> Parser(i, o, e) {
+  parser1: Parser(i, o1, e),
+  parser2: Parser(i, o2, e),
+  fun: fn(o1, o2) -> o3,
+) -> Parser(i, o3, e) {
   fn(input) {
     let result1 = run(parser1, input)
     case result1 {
@@ -65,4 +65,8 @@ pub fn map(
       Error(e) -> Error(e)
     }
   }
+}
+
+pub fn return(o) -> Parser(i, o, e) {
+  fn(input) { Ok(tuple(input, o)) }
 }

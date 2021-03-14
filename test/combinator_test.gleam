@@ -1,6 +1,7 @@
 import combiner/combinator
 import combiner/char
 import combiner/test
+import combiner/prim.{ParseError}
 import gleam/should
 
 pub fn alt_test() {
@@ -12,4 +13,19 @@ pub fn alt_test() {
 
   combinator.alt([take_alphabetic, take_integer])("11cc22dd")
   |> should.equal(Ok(tuple("cc22dd", "11")))
+}
+
+pub fn sequence_test() {
+  let parser_a = char.char("A")
+  let parser_1 = char.char("1")
+  let parser_b = char.char("B")
+
+  combinator.sequence([parser_a, parser_1, parser_b])("A1B2")
+  |> should.equal(Ok(tuple("2", ["A", "1", "B"])))
+
+  combinator.sequence([parser_a, parser_1, parser_b])("A2B2")
+  |> should.equal(Error(ParseError("2B2", "CharError")))
+
+  combinator.sequence([])("A1B2")
+  |> should.equal(Ok(tuple("A1B2", [])))
 }
