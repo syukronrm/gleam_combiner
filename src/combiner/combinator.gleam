@@ -14,3 +14,15 @@ pub fn sequence(parsers: List(Parser(i, o, e))) -> Parser(i, List(o), e) {
     [head, ..tail] -> prim.then(head, sequence(tail), concat_list)
   }
 }
+
+fn recursive(parser1, parser2, input) {
+  let concat_list = fn(head, tail) { [head, ..tail] }
+  case prim.then(parser1, parser2, concat_list)(input) {
+    Error(_) -> parser2(input)
+    Ok(tuple(input2, output)) -> recursive(parser1, prim.return(output), input2)
+  }
+}
+
+pub fn many(parser: Parser(i, o, e)) -> Parser(i, List(o), e) {
+  recursive(parser, prim.return([]), _)
+}

@@ -29,3 +29,19 @@ pub fn sequence_test() {
   combinator.sequence([])("A1B2")
   |> should.equal(Ok(tuple("A1B2", [])))
 }
+
+pub fn many_test() {
+  let parser_a = char.char("A")
+
+  combinator.many(parser_a)("A1B2")
+  |> should.equal(Ok(tuple("1B2", ["A"])))
+
+  combinator.many(parser_a)("AAA1B2")
+  |> should.equal(Ok(tuple("1B2", ["A", "A", "A"])))
+
+  combinator.many(parser_a)("1B2")
+  |> should.equal(Ok(tuple("1B2", [])))
+
+  combinator.many(parser_a)("")
+  |> should.equal(Ok(tuple("", [])))
+}
