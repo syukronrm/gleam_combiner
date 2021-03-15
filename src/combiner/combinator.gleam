@@ -17,13 +17,15 @@ pub fn sequence(parsers: List(Parser(i, o, e))) -> Parser(i, List(o), e) {
 
 fn match_zero_or_more(parser1, parser2, input) {
   let concat_list = fn(head, tail) { [head, ..tail] }
-  case prim.then(parser1, parser2, concat_list)(input) {
-    Error(_) -> parser2(input)
+  let parser = prim.then(parser1, parser2, concat_list)
+  case prim.run(parser, input) {
+    Error(_) -> prim.run(parser2, input)
     Ok(tuple(input2, output)) ->
       match_zero_or_more(parser1, prim.return(output), input2)
   }
 }
 
 pub fn many(parser: Parser(i, o, e)) -> Parser(i, List(o), e) {
-  match_zero_or_more(parser, prim.return([]), _)
+  let fun = match_zero_or_more(parser, prim.return([]), _)
+  Parser(fun, "Many")
 }

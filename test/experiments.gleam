@@ -8,10 +8,12 @@ import gleam/should
 fn parse_three_chars_as_str(input) {
   let concat_output = fn(o1, o2) { string.append(o1, o2) }
 
-  let parsers =
+  let parsers = fn(input) {
     char.char("A")
     |> prim.then(char.char("B"), concat_output)
     |> prim.then(char.char("B"), concat_output)
+    |> prim.run(input)
+  }
 
   parsers(input)
 }
