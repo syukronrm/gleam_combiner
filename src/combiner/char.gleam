@@ -1,5 +1,5 @@
 import combiner/prim.{ParseError, Parser}
-import gleam/string
+import gleam/string.{append}
 import gleam/bit_string
 import gleam/int
 import gleam/list.{Continue, Stop}
@@ -147,32 +147,40 @@ pub fn take_till(
 
 pub fn char(c: String) -> Parser(String, String, ParseError(String)) {
   let label = "Char"
-  let fun = fn(input) {
-    case string.pop_grapheme(input) {
-      Error(_) -> Error(ParseError(input, "CharError", label))
-      Ok(tuple(first_char, rest)) ->
-        case first_char == c {
-          False -> Error(ParseError(input, "CharError", label))
-          True -> Ok(tuple(rest, c))
-        }
-    }
-  }
-
-  Parser(fun, label)
+  let predicate = fn(first_c) { first_c == c }
+  satisfy(predicate, label)
 }
 
 pub fn any_of(chars: String) -> Parser(String, String, ParseError(String)) {
   let label = "AnyOf"
   let fun = fn(input) {
     case string.pop_grapheme(input) {
-      Error(_) -> Error(ParseError(input, "AnyOfError", label))
+      Error(_) -> Error(ParseError(input, "No more input", label))
       Ok(tuple(c, rest)) -> {
         let graphemes = string.to_graphemes(chars)
         case list.contains(graphemes, c) {
           True -> Ok(tuple(rest, c))
-          _ -> Error(ParseError(input, "AnyOfError", label))
+          _ -> Error(ParseError(input, "Unexpected", label))
         }
       }
+    }
+  }
+
+  Parser(fun, label)
+}
+
+pub fn satisfy(
+  predicate: fn(String) -> Bool,
+  label: String,
+) -> Parser(String, String, ParseError(String)) {
+  let fun = fn(input) {
+    case string.pop_grapheme(input) {
+      Error(_) -> Error(ParseError(input, "No more input", label))
+      Ok(tuple(c, rest)) ->
+        case predicate(c) {
+          True -> Ok(tuple(rest, c))
+          False -> Error(ParseError(input, "Unexpected", label))
+        }
     }
   }
 

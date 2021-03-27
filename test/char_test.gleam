@@ -67,11 +67,11 @@ pub fn char_test() {
 
   char.char("x")
   |> prim.run("Example")
-  |> should.equal(Error(ParseError("Example", "CharError", "Char")))
+  |> should.equal(Error(ParseError("Example", "Unexpected", "Char")))
 
   char.char("E")
   |> prim.run("")
-  |> should.equal(Error(ParseError("", "CharError", "Char")))
+  |> should.equal(Error(ParseError("", "No more input", "Char")))
 }
 
 pub fn any_of_test() {
@@ -81,5 +81,5 @@ pub fn any_of_test() {
 
   char.any_of("AO")
   |> prim.run("Example")
-  |> should.equal(Error(ParseError("Example", "AnyOfError", "AnyOf")))
+  |> should.equal(Error(ParseError("Example", "Unexpected", "AnyOf")))
 }

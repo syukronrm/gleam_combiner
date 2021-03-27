@@ -28,7 +28,7 @@ pub fn sequence_test() {
 
   combinator.sequence([parser_a, parser_1, parser_b])
   |> prim.run("A2B2")
-  |> should.equal(Error(ParseError("2B2", "CharError", "Char")))
+  |> should.equal(Error(ParseError("2B2", "Unexpected", "Char")))
 
   combinator.sequence([])
   |> prim.run("A1B2")
