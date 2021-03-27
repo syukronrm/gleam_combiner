@@ -169,6 +169,12 @@ pub fn any_of(chars: String) -> Parser(String, String, ParseError(String)) {
   Parser(fun, label)
 }
 
+pub fn whitespace() -> Parser(String, String, ParseError(String)) {
+  let label = "Whitespace"
+  let predicate = fn(first_c) { list.contains([" ", "\t"], first_c) }
+  satisfy(predicate, label)
+}
+
 pub fn satisfy(
   predicate: fn(String) -> Bool,
   label: String,

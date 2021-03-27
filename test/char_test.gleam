@@ -83,3 +83,13 @@ pub fn any_of_test() {
   |> prim.run("Example")
   |> should.equal(Error(ParseError("Example", "Unexpected", "AnyOf")))
 }
+
+pub fn whitespace_test() {
+  char.whitespace()
+  |> prim.run(" E\txample")
+  |> should.equal(Ok(tuple("E\txample", " ")))
+
+  char.whitespace()
+  |> prim.run("E xample")
+  |> should.equal(Error(ParseError("E xample", "Unexpected", "Whitespace")))
+}
