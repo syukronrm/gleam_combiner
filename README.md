@@ -1,6 +1,6 @@
 # combiner
 
-An experimental parser combinator, inspired by [Nom](https://github.com/Geal/nom).
+An experimental parser combinator.
 
 ## Quick start
 
